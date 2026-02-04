@@ -292,6 +292,8 @@ export default defineType({
 
 When a user uploads an image through this field using the media plugin, the asset will automatically be tagged with "employee" and "portrait". If these tags don't exist yet, they will be created automatically (this behavior can be disabled with the `createTagsOnUpload: false` plugin option).
 
+**Important:** Auto-tagging only works when uploading through the **Media Browser** (click to open the media library, then upload there). Direct drag-and-drop onto the image field uses Sanity's native uploader which bypasses the plugin, so tags will not be applied automatically.
+
 **Note:** The `mediaTags` option is not typed in Sanity's core field definitions. TypeScript users can use type assertion or extend the field options type:
 
 ```ts
