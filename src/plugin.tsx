@@ -38,18 +38,15 @@ export const media = definePlugin<MediaToolOptions | void>(options => ({
     file: {
       assetSources: prev => {
         return [...prev, mediaAssetSource]
-      },
-      components: {
-        input: AutoTagInputWrapper
       }
     },
     image: {
       assetSources: prev => {
         return [...prev, mediaAssetSource]
-      },
-      components: {
-        input: AutoTagInputWrapper
       }
+    },
+    components: {
+      input: AutoTagInputWrapper
     }
   },
   schema: {
