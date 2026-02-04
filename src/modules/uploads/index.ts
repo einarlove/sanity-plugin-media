@@ -310,8 +310,8 @@ export const uploadsAutoTagEpic: MyEpic = (action$, _state$, {client}) =>
                     _type: 'slug',
                     current: tagName
                   }
-                })
-              ) as ReturnType<typeof of<Tag>>
+                }) as Promise<Tag>
+              )
             }
             // Otherwise, return null to skip this tag
             return of(null)

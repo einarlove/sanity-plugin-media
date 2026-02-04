@@ -30,7 +30,7 @@ export type MediaToolOptions = {
   /**
    * When using the `mediaTags` field option, automatically create tags that don't exist yet.
    * If set to `false`, only existing tags will be applied to uploaded assets.
-   * @default true
+   * Defaults to `true`.
    */
   createTagsOnUpload?: boolean
 }
