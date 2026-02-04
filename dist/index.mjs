@@ -452,14 +452,18 @@ const ToolOptionsContext = createContext(null), ToolOptionsProvider = ({ options
   return context;
 };
 function AutoTagInputWrapper(props) {
-  const { renderDefault, value, schemaType } = props, client = useClient({ apiVersion: "2022-10-01" }), { createTagsOnUpload } = useToolOptions(), mediaTags = schemaType?.options?.mediaTags, prevAssetRef = useRef(void 0), isInitialMount = useRef(!0), currentAssetRef = value?.asset?._ref;
+  const { renderDefault, schemaType } = props, typeName = schemaType?.type?.name || schemaType?.name, isAssetField = typeName === "image" || typeName === "file", mediaTags = schemaType?.options?.mediaTags;
+  return !isAssetField || !mediaTags || mediaTags.length === 0 ? renderDefault(props) : /* @__PURE__ */ jsx(AutoTagAssetInput, { ...props, mediaTags });
+}
+function AutoTagAssetInput(props) {
+  const { renderDefault, value, mediaTags } = props, client = useClient({ apiVersion: "2022-10-01" }), { createTagsOnUpload } = useToolOptions(), prevAssetRef = useRef(void 0), isInitialMount = useRef(!0), currentAssetRef = value?.asset?._ref;
   return useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = !1, prevAssetRef.current = currentAssetRef;
       return;
     }
     const previousRef = prevAssetRef.current;
-    prevAssetRef.current = currentAssetRef, currentAssetRef && currentAssetRef !== previousRef && mediaTags && mediaTags.length > 0 && applyMediaTags({
+    prevAssetRef.current = currentAssetRef, currentAssetRef && currentAssetRef !== previousRef && applyMediaTags({
       client,
       assetId: currentAssetRef,
       mediaTags,
@@ -5728,16 +5732,13 @@ const plugin = {
   },
   form: {
     file: {
-      assetSources: (prev) => [...prev, mediaAssetSource],
-      components: {
-        input: AutoTagInputWrapper
-      }
+      assetSources: (prev) => [...prev, mediaAssetSource]
     },
     image: {
-      assetSources: (prev) => [...prev, mediaAssetSource],
-      components: {
-        input: AutoTagInputWrapper
-      }
+      assetSources: (prev) => [...prev, mediaAssetSource]
+    },
+    components: {
+      input: AutoTagInputWrapper
     }
   },
   schema: {
