@@ -95,7 +95,6 @@ export default defineConfig({
 })
 ```
 
-
 ### Plugin Config
 
 ```ts
@@ -111,7 +110,7 @@ export default defineConfig({
         enabled: true,
         // boolean - enables an optional "Credit Line" field in the plugin.
         // Used to store credits e.g. photographer, licence information
-        excludeSources: ['unsplash'],
+        excludeSources: ['unsplash']
         // string | string[] - when used with 3rd party asset sources, you may
         // wish to prevent users overwriting the creditLine based on the `source.name`
       },
@@ -128,7 +127,7 @@ export default defineConfig({
       }
       // Custom components to override default UI (see below)
     })
-  ],
+  ]
 })
 ```
 
@@ -290,9 +289,9 @@ export default defineType({
 })
 ```
 
-When a user uploads an image through this field using the media plugin, the asset will automatically be tagged with "employee" and "portrait". If these tags don't exist yet, they will be created automatically (this behavior can be disabled with the `createTagsOnUpload: false` plugin option).
+When a user uploads an image through this field, the asset will automatically be tagged with "employee" and "portrait". If these tags don't exist yet, they will be created automatically (this behavior can be disabled with the `createTagsOnUpload: false` plugin option).
 
-**Important:** Auto-tagging only works when uploading through the **Media Browser** (click to open the media library, then upload there). Direct drag-and-drop onto the image field uses Sanity's native uploader which bypasses the plugin, so tags will not be applied automatically.
+Auto-tagging works with both the Media Browser and the native Sanity upload button (including drag-and-drop).
 
 **Note:** The `mediaTags` option is not typed in Sanity's core field definitions. TypeScript users can use type assertion or extend the field options type:
 

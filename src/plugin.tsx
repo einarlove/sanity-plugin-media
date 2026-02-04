@@ -1,5 +1,6 @@
 import {type AssetSource, type Tool as SanityTool, definePlugin} from 'sanity'
 import {ImageIcon} from '@sanity/icons'
+import AutoTagInputWrapper from './components/AutoTagInputWrapper'
 import FormBuilderTool from './components/FormBuilderTool'
 import Tool from './components/Tool'
 import mediaTag from './schemas/tag'
@@ -37,11 +38,17 @@ export const media = definePlugin<MediaToolOptions | void>(options => ({
     file: {
       assetSources: prev => {
         return [...prev, mediaAssetSource]
+      },
+      components: {
+        input: AutoTagInputWrapper
       }
     },
     image: {
       assetSources: prev => {
         return [...prev, mediaAssetSource]
+      },
+      components: {
+        input: AutoTagInputWrapper
       }
     }
   },

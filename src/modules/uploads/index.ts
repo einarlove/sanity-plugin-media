@@ -224,7 +224,9 @@ export const uploadsCompleteQueueEpic: MyEpic = action$ =>
     filter(UPLOADS_ACTIONS.uploadComplete.match),
     mergeMap(action => {
       const {asset, createTagsOnUpload, mediaTags} = action.payload
-      const actions: ReturnType<typeof uploadsActions.checkRequest | typeof UPLOADS_ACTIONS.autoTagRequest>[] = [
+      const actions: ReturnType<
+        typeof uploadsActions.checkRequest | typeof UPLOADS_ACTIONS.autoTagRequest
+      >[] = [
         uploadsActions.checkRequest({
           assets: [asset]
         })
