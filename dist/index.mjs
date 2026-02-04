@@ -1,12 +1,12 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import { useClient, useColorSchemeValue, useSchema, Preview, useDocumentStore, WithReferringDocuments, useFormValue, definePlugin } from "sanity";
 import { ThLargeIcon, ThListIcon, SortIcon, CloseIcon, SelectIcon, AddIcon, SearchIcon, PlugIcon, ClipboardIcon, DownloadIcon, ChevronDownIcon, ErrorOutlineIcon, WarningOutlineIcon, EditIcon, ArrowUpIcon, ArrowDownIcon, TrashIcon, ComposeIcon, Icon, UploadIcon, WarningFilledIcon, CheckmarkCircleIcon, ChevronUpIcon, ImageIcon } from "@sanity/icons";
-import { Inline, Button, usePortal, MenuButton, Menu as Menu$2, MenuItem, MenuDivider, Box, studioTheme, rem, Flex, Label, Text, TextInput, Card, MenuGroup, useMediaIndex, Tooltip, Switch, Popover, Stack, Dialog as Dialog$1, TextArea, TabList, Tab, TabPanel, Container as Container$2, Spinner, Checkbox, Grid, useToast, PortalProvider, useLayer, Portal } from "@sanity/ui";
-import { useRef, useCallback, useEffect, createContext, useContext, useMemo, useState, forwardRef, memo, Component } from "react";
+import { createContext, useMemo, useContext, useRef, useEffect, useCallback, useState, forwardRef, memo, Component } from "react";
 import groq from "groq";
+import { nanoid } from "nanoid";
+import { Inline, Button, usePortal, MenuButton, Menu as Menu$2, MenuItem, MenuDivider, Box, studioTheme, rem, Flex, Label, Text, TextInput, Card, MenuGroup, useMediaIndex, Tooltip, Switch, Popover, Stack, Dialog as Dialog$1, TextArea, TabList, Tab, TabPanel, Container as Container$2, Spinner, Checkbox, Grid, useToast, PortalProvider, useLayer, Portal } from "@sanity/ui";
 import { useSelector, useDispatch, Provider } from "react-redux";
 import { createAction, createSlice, isAnyOf, createSelector, combineReducers, configureStore } from "@reduxjs/toolkit";
-import { nanoid } from "nanoid";
 import { ofType, combineEpics, createEpicMiddleware } from "redux-observable";
 import { iif, throwError, of, from, EMPTY, Subject, Observable, merge, empty, forkJoin } from "rxjs";
 import { delay, mergeMap, filter, withLatestFrom, catchError, switchMap, bufferTime, debounceTime, first, map, takeUntil } from "rxjs/operators";
@@ -27,156 +27,7 @@ import { useIntentLink } from "sanity/router";
 import { FileIcon as FileIcon$1, defaultStyles } from "react-file-icon";
 import CreatableSelect from "react-select/creatable";
 import { useDropzone } from "react-dropzone";
-function getDefaultExportFromCjs(x) {
-  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x.default : x;
-}
-var lib = {}, hasRequiredLib;
-function requireLib() {
-  if (hasRequiredLib) return lib;
-  hasRequiredLib = 1, Object.defineProperty(lib, "__esModule", {
-    value: !0
-  });
-  for (var IS_MAC = typeof window < "u" && /Mac|iPod|iPhone|iPad/.test(window.navigator.platform), MODIFIERS = {
-    alt: "altKey",
-    control: "ctrlKey",
-    meta: "metaKey",
-    shift: "shiftKey"
-  }, ALIASES = {
-    add: "+",
-    break: "pause",
-    cmd: "meta",
-    command: "meta",
-    ctl: "control",
-    ctrl: "control",
-    del: "delete",
-    down: "arrowdown",
-    esc: "escape",
-    ins: "insert",
-    left: "arrowleft",
-    mod: IS_MAC ? "meta" : "control",
-    opt: "alt",
-    option: "alt",
-    return: "enter",
-    right: "arrowright",
-    space: " ",
-    spacebar: " ",
-    up: "arrowup",
-    win: "meta",
-    windows: "meta"
-  }, CODES = {
-    backspace: 8,
-    tab: 9,
-    enter: 13,
-    shift: 16,
-    control: 17,
-    alt: 18,
-    pause: 19,
-    capslock: 20,
-    escape: 27,
-    " ": 32,
-    pageup: 33,
-    pagedown: 34,
-    end: 35,
-    home: 36,
-    arrowleft: 37,
-    arrowup: 38,
-    arrowright: 39,
-    arrowdown: 40,
-    insert: 45,
-    delete: 46,
-    meta: 91,
-    numlock: 144,
-    scrolllock: 145,
-    ";": 186,
-    "=": 187,
-    ",": 188,
-    "-": 189,
-    ".": 190,
-    "/": 191,
-    "`": 192,
-    "[": 219,
-    "\\": 220,
-    "]": 221,
-    "'": 222
-  }, f = 1; f < 20; f++)
-    CODES["f" + f] = 111 + f;
-  function isHotkey2(hotkey, options, event) {
-    options && !("byKey" in options) && (event = options, options = null), Array.isArray(hotkey) || (hotkey = [hotkey]);
-    var array = hotkey.map(function(string) {
-      return parseHotkey(string, options);
-    }), check = function(e) {
-      return array.some(function(object) {
-        return compareHotkey(object, e);
-      });
-    }, ret = event == null ? check : check(event);
-    return ret;
-  }
-  function isCodeHotkey(hotkey, event) {
-    return isHotkey2(hotkey, event);
-  }
-  function isKeyHotkey(hotkey, event) {
-    return isHotkey2(hotkey, { byKey: !0 }, event);
-  }
-  function parseHotkey(hotkey, options) {
-    var byKey = options && options.byKey, ret = {};
-    hotkey = hotkey.replace("++", "+add");
-    var values = hotkey.split("+"), length = values.length;
-    for (var k in MODIFIERS)
-      ret[MODIFIERS[k]] = !1;
-    var _iteratorNormalCompletion = !0, _didIteratorError = !1, _iteratorError = void 0;
-    try {
-      for (var _iterator = values[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = !0) {
-        var value = _step.value, optional = value.endsWith("?") && value.length > 1;
-        optional && (value = value.slice(0, -1));
-        var name = toKeyName(value), modifier = MODIFIERS[name];
-        if (value.length > 1 && !modifier && !ALIASES[value] && !CODES[name])
-          throw new TypeError('Unknown modifier: "' + value + '"');
-        (length === 1 || !modifier) && (byKey ? ret.key = name : ret.which = toKeyCode(value)), modifier && (ret[modifier] = optional ? null : !0);
-      }
-    } catch (err) {
-      _didIteratorError = !0, _iteratorError = err;
-    } finally {
-      try {
-        !_iteratorNormalCompletion && _iterator.return && _iterator.return();
-      } finally {
-        if (_didIteratorError)
-          throw _iteratorError;
-      }
-    }
-    return ret;
-  }
-  function compareHotkey(object, event) {
-    for (var key in object) {
-      var expected = object[key], actual = void 0;
-      if (expected != null && (key === "key" && event.key != null ? actual = event.key.toLowerCase() : key === "which" ? actual = expected === 91 && event.which === 93 ? 91 : event.which : actual = event[key], !(actual == null && expected === !1) && actual !== expected))
-        return !1;
-    }
-    return !0;
-  }
-  function toKeyCode(name) {
-    name = toKeyName(name);
-    var code = CODES[name] || name.toUpperCase().charCodeAt(0);
-    return code;
-  }
-  function toKeyName(name) {
-    return name = name.toLowerCase(), name = ALIASES[name] || name, name;
-  }
-  return lib.default = isHotkey2, lib.isHotkey = isHotkey2, lib.isCodeHotkey = isCodeHotkey, lib.isKeyHotkey = isKeyHotkey, lib.parseHotkey = parseHotkey, lib.compareHotkey = compareHotkey, lib.toKeyCode = toKeyCode, lib.toKeyName = toKeyName, lib;
-}
-var libExports = requireLib(), isHotkey = /* @__PURE__ */ getDefaultExportFromCjs(libExports);
-const useKeyPress = (hotkey, onPress) => {
-  const keyPressed = useRef(!1), downHandler = useCallback(
-    (e) => {
-      isHotkey(hotkey, e) && (keyPressed.current = !0, onPress && onPress());
-    },
-    [hotkey, onPress]
-  ), upHandler = useCallback(() => {
-    keyPressed.current = !1;
-  }, []);
-  return useEffect(() => (window.addEventListener("keydown", downHandler), window.addEventListener("keyup", upHandler), () => {
-    window.removeEventListener("keydown", downHandler), window.removeEventListener("keyup", upHandler);
-  }), [downHandler, upHandler]), keyPressed;
-}, divider = { type: "divider" }, inputs = {
+const divider = { type: "divider" }, inputs = {
   altText: {
     assetTypes: ["file", "image"],
     field: "altText",
@@ -539,7 +390,235 @@ const useKeyPress = (hotkey, onPress) => {
 ], GRID_TEMPLATE_COLUMNS = {
   SMALL: "3rem 100px auto 1.5rem",
   LARGE: "3rem 100px auto 5.5rem 5.5rem 3.5rem 8.5rem 4.75rem 2rem"
-}, PANEL_HEIGHT = 32, TAG_DOCUMENT_NAME = "media.tag", TAGS_PANEL_WIDTH = 250, AssetSourceDispatchContext = createContext(void 0), AssetBrowserDispatchProvider = (props) => {
+}, PANEL_HEIGHT = 32, TAG_DOCUMENT_NAME = "media.tag", TAGS_PANEL_WIDTH = 250;
+async function applyMediaTags({
+  client,
+  assetId,
+  mediaTags,
+  createTagsOnUpload = !0
+}) {
+  if (!mediaTags || mediaTags.length === 0)
+    return;
+  const validTags = (await Promise.all(
+    mediaTags.map(async (tagName) => await client.fetch(
+      groq`*[_type == "${TAG_DOCUMENT_NAME}" && name.current == $tagName][0]`,
+      { tagName }
+    ) || (createTagsOnUpload ? await client.create({
+      _type: TAG_DOCUMENT_NAME,
+      name: {
+        _type: "slug",
+        current: tagName
+      }
+    }) : null))
+  )).filter((tag) => tag !== null);
+  if (validTags.length === 0)
+    return;
+  const tagReferences = validTags.map((tag) => ({
+    _key: nanoid(),
+    _ref: tag._id,
+    _type: "reference",
+    _weak: !0
+  }));
+  await client.patch(assetId).setIfMissing({ opt: {} }).setIfMissing({ "opt.media": {} }).setIfMissing({ "opt.media.tags": [] }).append("opt.media.tags", tagReferences).commit();
+}
+const ToolOptionsContext = createContext(null), ToolOptionsProvider = ({ options, children }) => {
+  const value = useMemo(() => {
+    let creditLineExcludeSources;
+    return options?.creditLine?.excludeSources && (creditLineExcludeSources = Array.isArray(options?.creditLine?.excludeSources) ? options.creditLine.excludeSources : [options?.creditLine?.excludeSources]), {
+      dropzone: { maxSize: options?.maximumUploadSize },
+      components: {
+        details: options?.components?.details
+      },
+      createTagsOnUpload: options?.createTagsOnUpload ?? !0,
+      creditLine: {
+        enabled: options?.creditLine?.enabled || !1,
+        excludeSources: creditLineExcludeSources
+      },
+      directUploads: options?.directUploads ?? !0
+    };
+  }, [
+    options?.creditLine?.enabled,
+    options?.components,
+    options?.createTagsOnUpload,
+    options?.creditLine?.excludeSources,
+    options?.maximumUploadSize,
+    options?.directUploads
+  ]);
+  return /* @__PURE__ */ jsx(ToolOptionsContext.Provider, { value, children });
+}, useToolOptions = () => {
+  const context = useContext(ToolOptionsContext);
+  if (!context)
+    throw new Error("useToolOptions must be used within an ToolOptionsProvider");
+  return context;
+};
+function AutoTagInputWrapper(props) {
+  const { renderDefault, value, schemaType } = props, client = useClient({ apiVersion: "2022-10-01" }), { createTagsOnUpload } = useToolOptions(), mediaTags = schemaType?.options?.mediaTags, prevAssetRef = useRef(void 0), isInitialMount = useRef(!0), currentAssetRef = value?.asset?._ref;
+  return useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = !1, prevAssetRef.current = currentAssetRef;
+      return;
+    }
+    const previousRef = prevAssetRef.current;
+    prevAssetRef.current = currentAssetRef, currentAssetRef && currentAssetRef !== previousRef && mediaTags && mediaTags.length > 0 && applyMediaTags({
+      client,
+      assetId: currentAssetRef,
+      mediaTags,
+      createTagsOnUpload
+    }).catch((err) => {
+      console.error("[sanity-plugin-media] Failed to apply auto-tags:", err);
+    });
+  }, [currentAssetRef, mediaTags, client, createTagsOnUpload]), renderDefault(props);
+}
+function getDefaultExportFromCjs(x) {
+  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x.default : x;
+}
+var lib = {}, hasRequiredLib;
+function requireLib() {
+  if (hasRequiredLib) return lib;
+  hasRequiredLib = 1, Object.defineProperty(lib, "__esModule", {
+    value: !0
+  });
+  for (var IS_MAC = typeof window < "u" && /Mac|iPod|iPhone|iPad/.test(window.navigator.platform), MODIFIERS = {
+    alt: "altKey",
+    control: "ctrlKey",
+    meta: "metaKey",
+    shift: "shiftKey"
+  }, ALIASES = {
+    add: "+",
+    break: "pause",
+    cmd: "meta",
+    command: "meta",
+    ctl: "control",
+    ctrl: "control",
+    del: "delete",
+    down: "arrowdown",
+    esc: "escape",
+    ins: "insert",
+    left: "arrowleft",
+    mod: IS_MAC ? "meta" : "control",
+    opt: "alt",
+    option: "alt",
+    return: "enter",
+    right: "arrowright",
+    space: " ",
+    spacebar: " ",
+    up: "arrowup",
+    win: "meta",
+    windows: "meta"
+  }, CODES = {
+    backspace: 8,
+    tab: 9,
+    enter: 13,
+    shift: 16,
+    control: 17,
+    alt: 18,
+    pause: 19,
+    capslock: 20,
+    escape: 27,
+    " ": 32,
+    pageup: 33,
+    pagedown: 34,
+    end: 35,
+    home: 36,
+    arrowleft: 37,
+    arrowup: 38,
+    arrowright: 39,
+    arrowdown: 40,
+    insert: 45,
+    delete: 46,
+    meta: 91,
+    numlock: 144,
+    scrolllock: 145,
+    ";": 186,
+    "=": 187,
+    ",": 188,
+    "-": 189,
+    ".": 190,
+    "/": 191,
+    "`": 192,
+    "[": 219,
+    "\\": 220,
+    "]": 221,
+    "'": 222
+  }, f = 1; f < 20; f++)
+    CODES["f" + f] = 111 + f;
+  function isHotkey2(hotkey, options, event) {
+    options && !("byKey" in options) && (event = options, options = null), Array.isArray(hotkey) || (hotkey = [hotkey]);
+    var array = hotkey.map(function(string) {
+      return parseHotkey(string, options);
+    }), check = function(e) {
+      return array.some(function(object) {
+        return compareHotkey(object, e);
+      });
+    }, ret = event == null ? check : check(event);
+    return ret;
+  }
+  function isCodeHotkey(hotkey, event) {
+    return isHotkey2(hotkey, event);
+  }
+  function isKeyHotkey(hotkey, event) {
+    return isHotkey2(hotkey, { byKey: !0 }, event);
+  }
+  function parseHotkey(hotkey, options) {
+    var byKey = options && options.byKey, ret = {};
+    hotkey = hotkey.replace("++", "+add");
+    var values = hotkey.split("+"), length = values.length;
+    for (var k in MODIFIERS)
+      ret[MODIFIERS[k]] = !1;
+    var _iteratorNormalCompletion = !0, _didIteratorError = !1, _iteratorError = void 0;
+    try {
+      for (var _iterator = values[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = !0) {
+        var value = _step.value, optional = value.endsWith("?") && value.length > 1;
+        optional && (value = value.slice(0, -1));
+        var name = toKeyName(value), modifier = MODIFIERS[name];
+        if (value.length > 1 && !modifier && !ALIASES[value] && !CODES[name])
+          throw new TypeError('Unknown modifier: "' + value + '"');
+        (length === 1 || !modifier) && (byKey ? ret.key = name : ret.which = toKeyCode(value)), modifier && (ret[modifier] = optional ? null : !0);
+      }
+    } catch (err) {
+      _didIteratorError = !0, _iteratorError = err;
+    } finally {
+      try {
+        !_iteratorNormalCompletion && _iterator.return && _iterator.return();
+      } finally {
+        if (_didIteratorError)
+          throw _iteratorError;
+      }
+    }
+    return ret;
+  }
+  function compareHotkey(object, event) {
+    for (var key in object) {
+      var expected = object[key], actual = void 0;
+      if (expected != null && (key === "key" && event.key != null ? actual = event.key.toLowerCase() : key === "which" ? actual = expected === 91 && event.which === 93 ? 91 : event.which : actual = event[key], !(actual == null && expected === !1) && actual !== expected))
+        return !1;
+    }
+    return !0;
+  }
+  function toKeyCode(name) {
+    name = toKeyName(name);
+    var code = CODES[name] || name.toUpperCase().charCodeAt(0);
+    return code;
+  }
+  function toKeyName(name) {
+    return name = name.toLowerCase(), name = ALIASES[name] || name, name;
+  }
+  return lib.default = isHotkey2, lib.isHotkey = isHotkey2, lib.isCodeHotkey = isCodeHotkey, lib.isKeyHotkey = isKeyHotkey, lib.parseHotkey = parseHotkey, lib.compareHotkey = compareHotkey, lib.toKeyCode = toKeyCode, lib.toKeyName = toKeyName, lib;
+}
+var libExports = requireLib(), isHotkey = /* @__PURE__ */ getDefaultExportFromCjs(libExports);
+const useKeyPress = (hotkey, onPress) => {
+  const keyPressed = useRef(!1), downHandler = useCallback(
+    (e) => {
+      isHotkey(hotkey, e) && (keyPressed.current = !0, onPress && onPress());
+    },
+    [hotkey, onPress]
+  ), upHandler = useCallback(() => {
+    keyPressed.current = !1;
+  }, []);
+  return useEffect(() => (window.addEventListener("keydown", downHandler), window.addEventListener("keyup", upHandler), () => {
+    window.removeEventListener("keydown", downHandler), window.removeEventListener("keyup", upHandler);
+  }), [downHandler, upHandler]), keyPressed;
+}, AssetSourceDispatchContext = createContext(void 0), AssetBrowserDispatchProvider = (props) => {
   const { children, onSelect, schemaType } = props, contextValue = {
     onSelect,
     schemaType
@@ -2393,35 +2472,6 @@ const Container$1 = styled(Box)(({ $scheme, theme }) => css`
   if (layout === "stack")
     return /* @__PURE__ */ jsx(StackContainer, { align: "flex-start", direction: "column", children: Items2 });
   throw Error("Invalid layout");
-}, ToolOptionsContext = createContext(null), ToolOptionsProvider = ({ options, children }) => {
-  const value = useMemo(() => {
-    let creditLineExcludeSources;
-    return options?.creditLine?.excludeSources && (creditLineExcludeSources = Array.isArray(options?.creditLine?.excludeSources) ? options.creditLine.excludeSources : [options?.creditLine?.excludeSources]), {
-      dropzone: { maxSize: options?.maximumUploadSize },
-      components: {
-        details: options?.components?.details
-      },
-      createTagsOnUpload: options?.createTagsOnUpload ?? !0,
-      creditLine: {
-        enabled: options?.creditLine?.enabled || !1,
-        excludeSources: creditLineExcludeSources
-      },
-      directUploads: options?.directUploads ?? !0
-    };
-  }, [
-    options?.creditLine?.enabled,
-    options?.components,
-    options?.createTagsOnUpload,
-    options?.creditLine?.excludeSources,
-    options?.maximumUploadSize,
-    options?.directUploads
-  ]);
-  return /* @__PURE__ */ jsx(ToolOptionsContext.Provider, { value, children });
-}, useToolOptions = () => {
-  const context = useContext(ToolOptionsContext);
-  if (!context)
-    throw new Error("useToolOptions must be used within an ToolOptionsProvider");
-  return context;
 }, SearchFacetsControl = () => {
   const dispatch = useDispatch(), assetTypes = useTypedSelector((state) => state.assets.assetTypes), searchFacets = useTypedSelector((state) => state.search.facets), selectedDocument = useTypedSelector((state) => state.selected.document), popoverProps = usePortalPopoverProps(), { creditLine } = useToolOptions(), isTool = !selectedDocument, filteredFacets = FACETS.filter((facet) => !creditLine?.enabled && facet?.type === "string" && facet?.name === "creditLine" ? !1 : facet.type === "group" || facet.type === "divider" ? !0 : isTool ? !facet?.selectOnly : facet.assetTypes.filter(
     (assetType) => assetTypes.includes(assetType)
@@ -5678,10 +5728,16 @@ const plugin = {
   },
   form: {
     file: {
-      assetSources: (prev) => [...prev, mediaAssetSource]
+      assetSources: (prev) => [...prev, mediaAssetSource],
+      components: {
+        input: AutoTagInputWrapper
+      }
     },
     image: {
-      assetSources: (prev) => [...prev, mediaAssetSource]
+      assetSources: (prev) => [...prev, mediaAssetSource],
+      components: {
+        input: AutoTagInputWrapper
+      }
     }
   },
   schema: {
