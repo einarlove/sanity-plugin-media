@@ -5610,8 +5610,10 @@ function getMediaTagNames(schemaType) {
   );
   return Array.from(unique);
 }
-async function seedMediaTagFacets(client, dispatch, tagNames) {
-  if (!tagNames.length) return !1;
+async function seedMediaTagFacets(client, tagNames) {
+  if (!tagNames.length) return [];
+  const tagFacetInput = inputs.tag;
+  if (tagFacetInput.type !== "searchable") return [];
   const resolvedTags = await client.fetch(
     groq__default.default`*[
       _type == "${TAG_DOCUMENT_NAME}"
@@ -5620,20 +5622,11 @@ async function seedMediaTagFacets(client, dispatch, tagNames) {
     ]{ _id, name }`,
     { tagNames }
   );
-  if (!resolvedTags?.length) return !1;
-  const tagFacetInput = inputs.tag;
-  if (tagFacetInput.type !== "searchable") return !1;
-  for (const tag of resolvedTags)
-    dispatch(
-      searchActions.facetsAdd({
-        facet: {
-          ...tagFacetInput,
-          operatorType: "references",
-          value: { label: tag.name.current, value: tag._id }
-        }
-      })
-    );
-  return !0;
+  return resolvedTags?.length ? resolvedTags.map((tag) => ({
+    id: tag._id,
+    name: tag.name.current,
+    facetInput: tagFacetInput
+  })) : [];
 }
 function createAssetHandler(dispatch) {
   return (update) => {
@@ -5670,10 +5663,26 @@ function createTagHandler(dispatch) {
 function useBrowserInit(client, schemaType) {
   const dispatch = reactRedux.useDispatch();
   react.useEffect(() => {
+    let cancelled = !1;
     dispatch(searchActions.facetsClear());
-    const loadAssets = () => dispatch(assetsActions.loadPageIndex({ pageIndex: 0 })), tagNames = getMediaTagNames(schemaType);
-    tagNames.length ? seedMediaTagFacets(client, dispatch, tagNames).then((seeded) => {
-      seeded || loadAssets();
+    const loadAssets = () => {
+      cancelled || dispatch(assetsActions.loadPageIndex({ pageIndex: 0 }));
+    }, tagNames = getMediaTagNames(schemaType);
+    tagNames.length ? seedMediaTagFacets(client, tagNames).then((resolvedTags) => {
+      if (!cancelled)
+        if (resolvedTags.length > 0)
+          for (const tag of resolvedTags)
+            dispatch(
+              searchActions.facetsAdd({
+                facet: {
+                  ...tag.facetInput,
+                  operatorType: "references",
+                  value: { label: tag.name, value: tag.id }
+                }
+              })
+            );
+        else
+          loadAssets();
     }).catch(() => {
       loadAssets();
     }) : loadAssets(), dispatch(tagsActions.fetchRequest());
@@ -5681,7 +5690,7 @@ function useBrowserInit(client, schemaType) {
       groq__default.default`*[_type in ["sanity.fileAsset", "sanity.imageAsset"] && !(_id in path("drafts.**"))]`
     ).subscribe(createAssetHandler(dispatch)), tagSubscription = client.listen(groq__default.default`*[_type == "${TAG_DOCUMENT_NAME}" && !(_id in path("drafts.**"))]`).subscribe(createTagHandler(dispatch));
     return () => {
-      assetSubscription.unsubscribe(), tagSubscription.unsubscribe();
+      cancelled = !0, assetSubscription.unsubscribe(), tagSubscription.unsubscribe();
     };
   }, [client, dispatch, schemaType]);
 }
