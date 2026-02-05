@@ -7,6 +7,7 @@ import type {Dispatch} from 'redux'
 
 import {TAG_DOCUMENT_NAME} from '../../constants'
 import {assetsActions} from '../../modules/assets'
+import {searchActions} from '../../modules/search'
 import {tagsActions} from '../../modules/tags'
 import type {Asset, Tag} from '../../types'
 
@@ -63,6 +64,9 @@ export function useBrowserInit(
   const dispatch = useDispatch()
 
   useEffect(() => {
+    // Clear any existing facets to ensure clean state on init (handles React StrictMode re-runs)
+    dispatch(searchActions.facetsClear())
+
     const loadAssets = () => dispatch(assetsActions.loadPageIndex({pageIndex: 0}))
 
     // Initialize: prefilter by mediaTags if configured, otherwise load all assets
