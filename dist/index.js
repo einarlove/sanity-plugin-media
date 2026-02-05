@@ -5670,6 +5670,7 @@ function createTagHandler(dispatch) {
 function useBrowserInit(client, schemaType) {
   const dispatch = reactRedux.useDispatch();
   react.useEffect(() => {
+    dispatch(searchActions.facetsClear());
     const loadAssets = () => dispatch(assetsActions.loadPageIndex({ pageIndex: 0 })), tagNames = getMediaTagNames(schemaType);
     tagNames.length ? seedMediaTagFacets(client, dispatch, tagNames).then((seeded) => {
       seeded || loadAssets();
