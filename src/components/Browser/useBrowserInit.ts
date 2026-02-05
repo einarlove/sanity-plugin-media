@@ -64,18 +64,41 @@ export function useBrowserInit(
   const dispatch = useDispatch()
 
   useEffect(() => {
-    // Clear any existing facets to ensure clean state on init (handles React StrictMode re-runs)
+    let cancelled = false
+
+    // Clear any existing facets to ensure clean state on init
     dispatch(searchActions.facetsClear())
 
-    const loadAssets = () => dispatch(assetsActions.loadPageIndex({pageIndex: 0}))
+    const loadAssets = () => {
+      if (!cancelled) {
+        dispatch(assetsActions.loadPageIndex({pageIndex: 0}))
+      }
+    }
 
     // Initialize: prefilter by mediaTags if configured, otherwise load all assets
     const tagNames = getMediaTagNames(schemaType)
 
     if (tagNames.length) {
-      seedMediaTagFacets(client, dispatch, tagNames)
-        .then(seeded => {
-          if (!seeded) loadAssets()
+      seedMediaTagFacets(client, tagNames)
+        .then(resolvedTags => {
+          if (cancelled) return
+
+          if (resolvedTags.length > 0) {
+            for (const tag of resolvedTags) {
+              dispatch(
+                searchActions.facetsAdd({
+                  facet: {
+                    ...tag.facetInput,
+                    operatorType: 'references',
+                    value: {label: tag.name, value: tag.id}
+                  }
+                })
+              )
+            }
+            // Facets added — assetsSearchEpic will trigger the initial load
+          } else {
+            loadAssets()
+          }
         })
         .catch(() => {
           loadAssets()
@@ -100,6 +123,7 @@ export function useBrowserInit(
       .subscribe(createTagHandler(dispatch))
 
     return () => {
+      cancelled = true
       assetSubscription.unsubscribe()
       tagSubscription.unsubscribe()
     }

@@ -1,12 +1,16 @@
 import type {SanityClient} from '@sanity/client'
 import groq from 'groq'
-import type {Dispatch} from 'redux'
 import type {AssetSourceComponentProps} from 'sanity'
 
 import {inputs} from '../../config/searchFacets'
 import {TAG_DOCUMENT_NAME} from '../../constants'
-import {searchActions} from '../../modules/search'
-import type {Tag} from '../../types'
+import type {SearchFacetInputSearchableProps, Tag} from '../../types'
+
+export type ResolvedMediaTag = {
+  id: string
+  name: string
+  facetInput: SearchFacetInputSearchableProps
+}
 
 /**
  * Extracts and normalizes mediaTags from schema field options.
@@ -23,16 +27,18 @@ export function getMediaTagNames(schemaType?: AssetSourceComponentProps['schemaT
 }
 
 /**
- * Resolves tag names to tag documents, then seeds search facets.
- * Returns true if facets were seeded (assets will load via search epic),
- * or false if caller should trigger a default load.
+ * Resolves tag names to tag documents.
+ * Returns resolved tags with their IDs and the facet input config,
+ * or an empty array if none could be resolved.
  */
 export async function seedMediaTagFacets(
   client: SanityClient,
-  dispatch: Dispatch,
   tagNames: string[]
-): Promise<boolean> {
-  if (!tagNames.length) return false
+): Promise<ResolvedMediaTag[]> {
+  if (!tagNames.length) return []
+
+  const tagFacetInput = inputs.tag
+  if (tagFacetInput.type !== 'searchable') return []
 
   const resolvedTags = await client.fetch<Array<Pick<Tag, '_id' | 'name'>>>(
     groq`*[
@@ -43,23 +49,11 @@ export async function seedMediaTagFacets(
     {tagNames}
   )
 
-  if (!resolvedTags?.length) return false
+  if (!resolvedTags?.length) return []
 
-  const tagFacetInput = inputs.tag
-  if (tagFacetInput.type !== 'searchable') return false
-
-  for (const tag of resolvedTags) {
-    dispatch(
-      searchActions.facetsAdd({
-        facet: {
-          ...tagFacetInput,
-          operatorType: 'references',
-          value: {label: tag.name.current, value: tag._id}
-        }
-      })
-    )
-  }
-
-  // Facets were seeded — assetsSearchEpic will trigger the initial load
-  return true
+  return resolvedTags.map(tag => ({
+    id: tag._id,
+    name: tag.name.current,
+    facetInput: tagFacetInput
+  }))
 }
