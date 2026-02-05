@@ -5,14 +5,14 @@ import { createContext, useMemo, useContext, useRef, useEffect, useCallback, use
 import groq from "groq";
 import { nanoid } from "nanoid";
 import { Inline, Button, usePortal, MenuButton, Menu as Menu$2, MenuItem, MenuDivider, Box, studioTheme, rem, Flex, Label, Text, TextInput, Card, MenuGroup, useMediaIndex, Tooltip, Switch, Popover, Stack, Dialog as Dialog$1, TextArea, TabList, Tab, TabPanel, Container as Container$2, Spinner, Checkbox, Grid, useToast, PortalProvider, useLayer, Portal } from "@sanity/ui";
+import { css, createGlobalStyle, styled } from "styled-components";
 import { useSelector, useDispatch, Provider } from "react-redux";
 import { createAction, createSlice, isAnyOf, createSelector, combineReducers, configureStore } from "@reduxjs/toolkit";
+import pluralize from "pluralize";
 import { ofType, combineEpics, createEpicMiddleware } from "redux-observable";
 import { iif, throwError, of, from, EMPTY, Subject, Observable, merge, empty, forkJoin } from "rxjs";
 import { delay, mergeMap, filter, withLatestFrom, catchError, switchMap, bufferTime, debounceTime, first, map, takeUntil } from "rxjs/operators";
 import { uuid } from "@sanity/uuid";
-import { css, createGlobalStyle, styled } from "styled-components";
-import pluralize from "pluralize";
 import { useNProgress } from "@tanem/react-nprogress";
 import { hues, white } from "@sanity/color";
 import Select, { components } from "react-select";
@@ -633,7 +633,40 @@ const useKeyPress = (hotkey, onPress) => {
   if (context === void 0)
     throw new Error("useAssetSourceActions must be used within an AssetSourceDispatchProvider");
   return context;
-}, useVersionedClient = () => useClient({ apiVersion: "2022-10-01" }), ORDER_DICTIONARY = {
+}, useVersionedClient = () => useClient({ apiVersion: "2022-10-01" }), customScrollbar = css`
+  ::-webkit-scrollbar {
+    width: 14px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background: var(--card-border-color);
+    background-clip: padding-box;
+
+    &:hover {
+      background: var(--card-muted-fg-color);
+      background-clip: padding-box;
+    }
+  }
+`, GlobalStyle = createGlobalStyle`
+  .media__custom-scrollbar {
+    ${customScrollbar}
+  }
+
+  // @sanity/ui overrides
+
+  // Custom scrollbar on Box (used in Dialogs)
+  div[data-ui="Box"] {
+    ${customScrollbar}
+  }
+
+  // Dialog background color
+  div[data-ui="Dialog"] {
+    background-color: rgba(15, 17, 18, 0.9);
+  }
+
+`, useTypedSelector = useSelector, ORDER_DICTIONARY = {
   _createdAt: {
     asc: "Last created: Oldest first",
     desc: "Last created: Newest first"
@@ -1730,40 +1763,7 @@ const UPLOADS_ACTIONS = {
   (assetsPicked) => assetsPicked.length
 ), assetsActions = { ...assetsSlice.actions };
 var assetsReducer = assetsSlice.reducer;
-const customScrollbar = css`
-  ::-webkit-scrollbar {
-    width: 14px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    border: 4px solid rgba(0, 0, 0, 0);
-    background: var(--card-border-color);
-    background-clip: padding-box;
-
-    &:hover {
-      background: var(--card-muted-fg-color);
-      background-clip: padding-box;
-    }
-  }
-`, GlobalStyle = createGlobalStyle`
-  .media__custom-scrollbar {
-    ${customScrollbar}
-  }
-
-  // @sanity/ui overrides
-
-  // Custom scrollbar on Box (used in Dialogs)
-  div[data-ui="Box"] {
-    ${customScrollbar}
-  }
-
-  // Dialog background color
-  div[data-ui="Dialog"] {
-    background-color: rgba(15, 17, 18, 0.9);
-  }
-
-`, useTypedSelector = useSelector, initialState$4 = {
+const initialState$4 = {
   items: []
 }, dialogSlice = createSlice({
   name: "dialog",
@@ -5606,24 +5606,92 @@ const UploadDropzone = (props) => {
     isDragActive && /* @__PURE__ */ jsx(DragActiveContainer, { children: /* @__PURE__ */ jsx(Flex, { direction: "column", justify: "center", style: { color: white.hex }, children: /* @__PURE__ */ jsx(Text, { size: 3, style: { color: "inherit" }, children: "Drop files to upload" }) }) }),
     children
   ] }) });
-}, BrowserContent = ({ onClose }) => {
-  const client = useVersionedClient(), [portalElement, setPortalElement] = useState(null), dispatch = useDispatch();
-  return useEffect(() => {
-    const handleAssetUpdate = (update) => {
-      const { documentId, result, transition } = update;
-      transition === "appear" && dispatch(assetsActions.listenerCreateQueue({ asset: result })), transition === "disappear" && dispatch(assetsActions.listenerDeleteQueue({ assetId: documentId })), transition === "update" && dispatch(assetsActions.listenerUpdateQueue({ asset: result }));
-    }, handleTagUpdate = (update) => {
-      const { documentId, result, transition } = update;
-      transition === "appear" && dispatch(tagsActions.listenerCreateQueue({ tag: result })), transition === "disappear" && dispatch(tagsActions.listenerDeleteQueue({ tagId: documentId })), transition === "update" && dispatch(tagsActions.listenerUpdateQueue({ tag: result }));
-    };
-    dispatch(assetsActions.loadPageIndex({ pageIndex: 0 })), dispatch(tagsActions.fetchRequest());
-    const subscriptionAsset = client.listen(
+};
+function getMediaTagNames(schemaType) {
+  const mediaTags = schemaType?.options?.mediaTags;
+  if (!mediaTags?.length) return [];
+  const unique = new Set(
+    mediaTags.map((t) => t?.trim()).filter((t) => !!t?.length)
+  );
+  return Array.from(unique);
+}
+async function seedMediaTagFacets(client, dispatch, tagNames) {
+  if (!tagNames.length) return !1;
+  const resolvedTags = await client.fetch(
+    groq`*[
+      _type == "${TAG_DOCUMENT_NAME}"
+      && name.current in $tagNames
+      && !(_id in path("drafts.**"))
+    ]{ _id, name }`,
+    { tagNames }
+  );
+  if (!resolvedTags?.length) return !1;
+  const tagFacetInput = inputs.tag;
+  if (tagFacetInput.type !== "searchable") return !1;
+  for (const tag of resolvedTags)
+    dispatch(
+      searchActions.facetsAdd({
+        facet: {
+          ...tagFacetInput,
+          operatorType: "references",
+          value: { label: tag.name.current, value: tag._id }
+        }
+      })
+    );
+  return !0;
+}
+function createAssetHandler(dispatch) {
+  return (update) => {
+    const { documentId, result, transition } = update;
+    switch (transition) {
+      case "appear":
+        dispatch(assetsActions.listenerCreateQueue({ asset: result }));
+        break;
+      case "disappear":
+        dispatch(assetsActions.listenerDeleteQueue({ assetId: documentId }));
+        break;
+      case "update":
+        dispatch(assetsActions.listenerUpdateQueue({ asset: result }));
+        break;
+    }
+  };
+}
+function createTagHandler(dispatch) {
+  return (update) => {
+    const { documentId, result, transition } = update;
+    switch (transition) {
+      case "appear":
+        dispatch(tagsActions.listenerCreateQueue({ tag: result }));
+        break;
+      case "disappear":
+        dispatch(tagsActions.listenerDeleteQueue({ tagId: documentId }));
+        break;
+      case "update":
+        dispatch(tagsActions.listenerUpdateQueue({ tag: result }));
+        break;
+    }
+  };
+}
+function useBrowserInit(client, schemaType) {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const loadAssets = () => dispatch(assetsActions.loadPageIndex({ pageIndex: 0 })), tagNames = getMediaTagNames(schemaType);
+    tagNames.length ? seedMediaTagFacets(client, dispatch, tagNames).then((seeded) => {
+      seeded || loadAssets();
+    }).catch(() => {
+      loadAssets();
+    }) : loadAssets(), dispatch(tagsActions.fetchRequest());
+    const assetSubscription = client.listen(
       groq`*[_type in ["sanity.fileAsset", "sanity.imageAsset"] && !(_id in path("drafts.**"))]`
-    ).subscribe(handleAssetUpdate), subscriptionTag = client.listen(groq`*[_type == "${TAG_DOCUMENT_NAME}" && !(_id in path("drafts.**"))]`).subscribe(handleTagUpdate);
+    ).subscribe(createAssetHandler(dispatch)), tagSubscription = client.listen(groq`*[_type == "${TAG_DOCUMENT_NAME}" && !(_id in path("drafts.**"))]`).subscribe(createTagHandler(dispatch));
     return () => {
-      subscriptionAsset?.unsubscribe(), subscriptionTag?.unsubscribe();
+      assetSubscription.unsubscribe(), tagSubscription.unsubscribe();
     };
-  }, [client, dispatch]), /* @__PURE__ */ jsx(PortalProvider, { element: portalElement, children: /* @__PURE__ */ jsxs(UploadDropzone, { children: [
+  }, [client, dispatch, schemaType]);
+}
+const BrowserContent = ({ onClose, schemaType }) => {
+  const client = useVersionedClient(), [portalElement, setPortalElement] = useState(null);
+  return useBrowserInit(client, schemaType), /* @__PURE__ */ jsx(PortalProvider, { element: portalElement, children: /* @__PURE__ */ jsxs(UploadDropzone, { children: [
     /* @__PURE__ */ jsx(Dialogs, {}),
     /* @__PURE__ */ jsx(Notifications, {}),
     /* @__PURE__ */ jsx(Card, { display: "flex", height: "fill", ref: setPortalElement, children: /* @__PURE__ */ jsxs(Flex, { direction: "column", flex: 1, children: [
@@ -5644,13 +5712,13 @@ const UploadDropzone = (props) => {
   return /* @__PURE__ */ jsx(
     ReduxProvider,
     {
-      assetType: props?.assetType,
+      assetType: props.assetType,
       client,
-      document: props?.document,
-      selectedAssets: props?.selectedAssets,
-      children: /* @__PURE__ */ jsxs(AssetBrowserDispatchProvider, { onSelect: props?.onSelect, schemaType: props?.schemaType, children: [
+      document: props.document,
+      selectedAssets: props.selectedAssets,
+      children: /* @__PURE__ */ jsxs(AssetBrowserDispatchProvider, { onSelect: props.onSelect, schemaType: props.schemaType, children: [
         /* @__PURE__ */ jsx(GlobalStyle, {}),
-        /* @__PURE__ */ jsx(BrowserContent, { onClose: props?.onClose })
+        /* @__PURE__ */ jsx(BrowserContent, { onClose: props.onClose, schemaType: props.schemaType })
       ] })
     }
   );

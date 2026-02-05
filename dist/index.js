@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: !0 });
-var jsxRuntime = require("react/jsx-runtime"), sanity = require("sanity"), icons = require("@sanity/icons"), react = require("react"), groq = require("groq"), nanoid = require("nanoid"), ui = require("@sanity/ui"), reactRedux = require("react-redux"), toolkit = require("@reduxjs/toolkit"), reduxObservable = require("redux-observable"), rxjs = require("rxjs"), operators$1 = require("rxjs/operators"), uuid = require("@sanity/uuid"), styledComponents = require("styled-components"), pluralize = require("pluralize"), reactNprogress = require("@tanem/react-nprogress"), color = require("@sanity/color"), Select = require("react-select"), reactVirtuoso = require("react-virtuoso"), zod = require("@hookform/resolvers/zod"), reactHookForm = require("react-hook-form"), z = require("zod"), dateFns = require("date-fns"), filesize = require("filesize"), copy = require("copy-to-clipboard"), router = require("sanity/router"), reactFileIcon = require("react-file-icon"), CreatableSelect = require("react-select/creatable"), reactDropzone = require("react-dropzone");
+var jsxRuntime = require("react/jsx-runtime"), sanity = require("sanity"), icons = require("@sanity/icons"), react = require("react"), groq = require("groq"), nanoid = require("nanoid"), ui = require("@sanity/ui"), styledComponents = require("styled-components"), reactRedux = require("react-redux"), toolkit = require("@reduxjs/toolkit"), pluralize = require("pluralize"), reduxObservable = require("redux-observable"), rxjs = require("rxjs"), operators$1 = require("rxjs/operators"), uuid = require("@sanity/uuid"), reactNprogress = require("@tanem/react-nprogress"), color = require("@sanity/color"), Select = require("react-select"), reactVirtuoso = require("react-virtuoso"), zod = require("@hookform/resolvers/zod"), reactHookForm = require("react-hook-form"), z = require("zod"), dateFns = require("date-fns"), filesize = require("filesize"), copy = require("copy-to-clipboard"), router = require("sanity/router"), reactFileIcon = require("react-file-icon"), CreatableSelect = require("react-select/creatable"), reactDropzone = require("react-dropzone");
 function _interopDefaultCompat(e) {
   return e && typeof e == "object" && "default" in e ? e : { default: e };
 }
@@ -626,7 +626,40 @@ const useKeyPress = (hotkey, onPress) => {
   if (context === void 0)
     throw new Error("useAssetSourceActions must be used within an AssetSourceDispatchProvider");
   return context;
-}, useVersionedClient = () => sanity.useClient({ apiVersion: "2022-10-01" }), ORDER_DICTIONARY = {
+}, useVersionedClient = () => sanity.useClient({ apiVersion: "2022-10-01" }), customScrollbar = styledComponents.css`
+  ::-webkit-scrollbar {
+    width: 14px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background: var(--card-border-color);
+    background-clip: padding-box;
+
+    &:hover {
+      background: var(--card-muted-fg-color);
+      background-clip: padding-box;
+    }
+  }
+`, GlobalStyle = styledComponents.createGlobalStyle`
+  .media__custom-scrollbar {
+    ${customScrollbar}
+  }
+
+  // @sanity/ui overrides
+
+  // Custom scrollbar on Box (used in Dialogs)
+  div[data-ui="Box"] {
+    ${customScrollbar}
+  }
+
+  // Dialog background color
+  div[data-ui="Dialog"] {
+    background-color: rgba(15, 17, 18, 0.9);
+  }
+
+`, useTypedSelector = reactRedux.useSelector, ORDER_DICTIONARY = {
   _createdAt: {
     asc: "Last created: Oldest first",
     desc: "Last created: Newest first"
@@ -1723,40 +1756,7 @@ const UPLOADS_ACTIONS = {
   (assetsPicked) => assetsPicked.length
 ), assetsActions = { ...assetsSlice.actions };
 var assetsReducer = assetsSlice.reducer;
-const customScrollbar = styledComponents.css`
-  ::-webkit-scrollbar {
-    width: 14px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    border: 4px solid rgba(0, 0, 0, 0);
-    background: var(--card-border-color);
-    background-clip: padding-box;
-
-    &:hover {
-      background: var(--card-muted-fg-color);
-      background-clip: padding-box;
-    }
-  }
-`, GlobalStyle = styledComponents.createGlobalStyle`
-  .media__custom-scrollbar {
-    ${customScrollbar}
-  }
-
-  // @sanity/ui overrides
-
-  // Custom scrollbar on Box (used in Dialogs)
-  div[data-ui="Box"] {
-    ${customScrollbar}
-  }
-
-  // Dialog background color
-  div[data-ui="Dialog"] {
-    background-color: rgba(15, 17, 18, 0.9);
-  }
-
-`, useTypedSelector = reactRedux.useSelector, initialState$4 = {
+const initialState$4 = {
   items: []
 }, dialogSlice = toolkit.createSlice({
   name: "dialog",
@@ -5601,24 +5601,92 @@ const UploadDropzone = (props) => {
     isDragActive && /* @__PURE__ */ jsxRuntime.jsx(DragActiveContainer, { children: /* @__PURE__ */ jsxRuntime.jsx(ui.Flex, { direction: "column", justify: "center", style: { color: color.white.hex }, children: /* @__PURE__ */ jsxRuntime.jsx(ui.Text, { size: 3, style: { color: "inherit" }, children: "Drop files to upload" }) }) }),
     children
   ] }) });
-}, BrowserContent = ({ onClose }) => {
-  const client = useVersionedClient(), [portalElement, setPortalElement] = react.useState(null), dispatch = reactRedux.useDispatch();
-  return react.useEffect(() => {
-    const handleAssetUpdate = (update) => {
-      const { documentId, result, transition } = update;
-      transition === "appear" && dispatch(assetsActions.listenerCreateQueue({ asset: result })), transition === "disappear" && dispatch(assetsActions.listenerDeleteQueue({ assetId: documentId })), transition === "update" && dispatch(assetsActions.listenerUpdateQueue({ asset: result }));
-    }, handleTagUpdate = (update) => {
-      const { documentId, result, transition } = update;
-      transition === "appear" && dispatch(tagsActions.listenerCreateQueue({ tag: result })), transition === "disappear" && dispatch(tagsActions.listenerDeleteQueue({ tagId: documentId })), transition === "update" && dispatch(tagsActions.listenerUpdateQueue({ tag: result }));
-    };
-    dispatch(assetsActions.loadPageIndex({ pageIndex: 0 })), dispatch(tagsActions.fetchRequest());
-    const subscriptionAsset = client.listen(
+};
+function getMediaTagNames(schemaType) {
+  const mediaTags = schemaType?.options?.mediaTags;
+  if (!mediaTags?.length) return [];
+  const unique = new Set(
+    mediaTags.map((t) => t?.trim()).filter((t) => !!t?.length)
+  );
+  return Array.from(unique);
+}
+async function seedMediaTagFacets(client, dispatch, tagNames) {
+  if (!tagNames.length) return !1;
+  const resolvedTags = await client.fetch(
+    groq__default.default`*[
+      _type == "${TAG_DOCUMENT_NAME}"
+      && name.current in $tagNames
+      && !(_id in path("drafts.**"))
+    ]{ _id, name }`,
+    { tagNames }
+  );
+  if (!resolvedTags?.length) return !1;
+  const tagFacetInput = inputs.tag;
+  if (tagFacetInput.type !== "searchable") return !1;
+  for (const tag of resolvedTags)
+    dispatch(
+      searchActions.facetsAdd({
+        facet: {
+          ...tagFacetInput,
+          operatorType: "references",
+          value: { label: tag.name.current, value: tag._id }
+        }
+      })
+    );
+  return !0;
+}
+function createAssetHandler(dispatch) {
+  return (update) => {
+    const { documentId, result, transition } = update;
+    switch (transition) {
+      case "appear":
+        dispatch(assetsActions.listenerCreateQueue({ asset: result }));
+        break;
+      case "disappear":
+        dispatch(assetsActions.listenerDeleteQueue({ assetId: documentId }));
+        break;
+      case "update":
+        dispatch(assetsActions.listenerUpdateQueue({ asset: result }));
+        break;
+    }
+  };
+}
+function createTagHandler(dispatch) {
+  return (update) => {
+    const { documentId, result, transition } = update;
+    switch (transition) {
+      case "appear":
+        dispatch(tagsActions.listenerCreateQueue({ tag: result }));
+        break;
+      case "disappear":
+        dispatch(tagsActions.listenerDeleteQueue({ tagId: documentId }));
+        break;
+      case "update":
+        dispatch(tagsActions.listenerUpdateQueue({ tag: result }));
+        break;
+    }
+  };
+}
+function useBrowserInit(client, schemaType) {
+  const dispatch = reactRedux.useDispatch();
+  react.useEffect(() => {
+    const loadAssets = () => dispatch(assetsActions.loadPageIndex({ pageIndex: 0 })), tagNames = getMediaTagNames(schemaType);
+    tagNames.length ? seedMediaTagFacets(client, dispatch, tagNames).then((seeded) => {
+      seeded || loadAssets();
+    }).catch(() => {
+      loadAssets();
+    }) : loadAssets(), dispatch(tagsActions.fetchRequest());
+    const assetSubscription = client.listen(
       groq__default.default`*[_type in ["sanity.fileAsset", "sanity.imageAsset"] && !(_id in path("drafts.**"))]`
-    ).subscribe(handleAssetUpdate), subscriptionTag = client.listen(groq__default.default`*[_type == "${TAG_DOCUMENT_NAME}" && !(_id in path("drafts.**"))]`).subscribe(handleTagUpdate);
+    ).subscribe(createAssetHandler(dispatch)), tagSubscription = client.listen(groq__default.default`*[_type == "${TAG_DOCUMENT_NAME}" && !(_id in path("drafts.**"))]`).subscribe(createTagHandler(dispatch));
     return () => {
-      subscriptionAsset?.unsubscribe(), subscriptionTag?.unsubscribe();
+      assetSubscription.unsubscribe(), tagSubscription.unsubscribe();
     };
-  }, [client, dispatch]), /* @__PURE__ */ jsxRuntime.jsx(ui.PortalProvider, { element: portalElement, children: /* @__PURE__ */ jsxRuntime.jsxs(UploadDropzone, { children: [
+  }, [client, dispatch, schemaType]);
+}
+const BrowserContent = ({ onClose, schemaType }) => {
+  const client = useVersionedClient(), [portalElement, setPortalElement] = react.useState(null);
+  return useBrowserInit(client, schemaType), /* @__PURE__ */ jsxRuntime.jsx(ui.PortalProvider, { element: portalElement, children: /* @__PURE__ */ jsxRuntime.jsxs(UploadDropzone, { children: [
     /* @__PURE__ */ jsxRuntime.jsx(Dialogs, {}),
     /* @__PURE__ */ jsxRuntime.jsx(Notifications, {}),
     /* @__PURE__ */ jsxRuntime.jsx(ui.Card, { display: "flex", height: "fill", ref: setPortalElement, children: /* @__PURE__ */ jsxRuntime.jsxs(ui.Flex, { direction: "column", flex: 1, children: [
@@ -5639,13 +5707,13 @@ const UploadDropzone = (props) => {
   return /* @__PURE__ */ jsxRuntime.jsx(
     ReduxProvider,
     {
-      assetType: props?.assetType,
+      assetType: props.assetType,
       client,
-      document: props?.document,
-      selectedAssets: props?.selectedAssets,
-      children: /* @__PURE__ */ jsxRuntime.jsxs(AssetBrowserDispatchProvider, { onSelect: props?.onSelect, schemaType: props?.schemaType, children: [
+      document: props.document,
+      selectedAssets: props.selectedAssets,
+      children: /* @__PURE__ */ jsxRuntime.jsxs(AssetBrowserDispatchProvider, { onSelect: props.onSelect, schemaType: props.schemaType, children: [
         /* @__PURE__ */ jsxRuntime.jsx(GlobalStyle, {}),
-        /* @__PURE__ */ jsxRuntime.jsx(BrowserContent, { onClose: props?.onClose })
+        /* @__PURE__ */ jsxRuntime.jsx(BrowserContent, { onClose: props.onClose, schemaType: props.schemaType })
       ] })
     }
   );
