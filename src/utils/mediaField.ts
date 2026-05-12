@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-restricted-imports
 import type {
   FieldDefinitionBase,
   FileDefinition,
@@ -7,7 +6,7 @@ import type {
   ImageOptions,
   WidenInitialValue,
   WidenValidation
-} from '@sanity/types'
+} from 'sanity'
 import {AutoTagInput} from '../components/AutoTagInputWrapper'
 
 type ImageMediaFieldConfig = Omit<ImageDefinition, 'options'> &

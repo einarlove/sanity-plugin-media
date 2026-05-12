@@ -130,10 +130,5 @@
   },
   "engines": {
     "node": ">=18"
-  },
-  "sanityPlugin": {
-    "verifyPackage": {
-      "dependencies": false
-    }
   }
 }
