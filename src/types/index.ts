@@ -5,6 +5,7 @@ import type {
   SanityDocument,
   SanityImageAssetDocument
 } from '@sanity/client'
+import type {FileOptions, ImageOptions} from '@sanity/types'
 import type {ComponentType, JSX} from 'react'
 import type {Epic} from 'redux-observable'
 import * as z from 'zod'
@@ -18,6 +19,10 @@ export type AssetTypes = (typeof SUPPORTED_ASSET_TYPES)[number]
 export type MediaTagsFieldOptions = {
   mediaTags?: string[]
 }
+
+export type MediaImageOptions = ImageOptions & MediaTagsFieldOptions
+
+export type MediaFileOptions = FileOptions & MediaTagsFieldOptions
 
 export type MediaToolOptions = {
   maximumUploadSize?: number

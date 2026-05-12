@@ -6,7 +6,7 @@ import type {
   ImageOptions,
   WidenInitialValue,
   WidenValidation
-} from 'sanity'
+} from '@sanity/types'
 import {AutoTagInput} from '../components/AutoTagInputWrapper'
 
 type ImageMediaFieldConfig = Omit<ImageDefinition, 'options'> &

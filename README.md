@@ -186,6 +186,21 @@ defineField({
 })
 ```
 
+> **Note:** passing `mediaTags` as a prop only controls auto-tagging. Browser pre-filtering is driven by `options.mediaTags` — if you omit it, the media browser will not pre-filter by tag when opening from that field. Use `options.mediaTags` (or `mediaField`) when you want both behaviours.
+
+For TypeScript, use the exported `MediaImageOptions` or `MediaFileOptions` types when typing field options:
+
+```ts
+import type {MediaImageOptions} from 'sanity-plugin-media'
+
+defineField({
+  name: 'image',
+  type: 'image',
+  options: {mediaTags: ['product'], hotspot: true} as MediaImageOptions,
+  components: {input: AutoTagInput},
+})
+```
+
 By default, tags that don't already exist will be created when an asset is selected. To disable this, set `createTagsOnUpload: false` in the plugin config:
 
 ```ts
