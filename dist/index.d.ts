@@ -1,13 +1,13 @@
 import {AssetSourceComponentProps} from 'sanity'
 import type {ComponentType} from 'react'
 import {Control} from 'react-hook-form'
-import type {FieldDefinitionBase} from 'sanity'
+import type {FieldDefinitionBase} from '@sanity/types'
 import {FieldErrors} from 'react-hook-form'
-import type {FileDefinition} from 'sanity'
-import type {FileOptions} from 'sanity'
+import type {FileDefinition} from '@sanity/types'
+import type {FileOptions} from '@sanity/types'
 import {ForwardRefExoticComponent} from 'react'
-import type {ImageDefinition} from 'sanity'
-import type {ImageOptions} from 'sanity'
+import type {ImageDefinition} from '@sanity/types'
+import type {ImageOptions} from '@sanity/types'
 import {InputProps} from 'sanity'
 import {JSX as JSX_2} from 'react'
 import {Plugin as Plugin_2} from 'sanity'
@@ -16,8 +16,8 @@ import type {SanityAssetDocument} from '@sanity/client'
 import type {SanityImageAssetDocument} from '@sanity/client'
 import {SVGProps} from 'react'
 import {UseFormRegister} from 'react-hook-form'
-import type {WidenInitialValue} from 'sanity'
-import type {WidenValidation} from 'sanity'
+import type {WidenInitialValue} from '@sanity/types'
+import type {WidenValidation} from '@sanity/types'
 import * as z from 'zod'
 
 declare type Asset = FileAsset | ImageAsset
@@ -337,6 +337,10 @@ declare type MediaFieldResult<
   }
 } & WidenValidation &
   WidenInitialValue
+
+export declare type MediaFileOptions = FileOptions & MediaTagsFieldOptions
+
+export declare type MediaImageOptions = ImageOptions & MediaTagsFieldOptions
 
 export declare type MediaTagsFieldOptions = {
   mediaTags?: string[]

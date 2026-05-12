@@ -5782,7 +5782,7 @@ async function doApplyMediaTags({
   tagReferences.length !== 0 && await client.patch(assetId).setIfMissing({ opt: {} }).setIfMissing({ "opt.media": {} }).setIfMissing({ "opt.media.tags": [] }).append("opt.media.tags", tagReferences).commit();
 }
 function AutoTagInput(props) {
-  const { renderDefault, schemaType, value, mediaTags: mediaTagsProp } = props, mediaTags = mediaTagsProp ?? schemaType?.options?.mediaTags, client = useVersionedClient(), { createTagsOnUpload } = useToolOptions(), prevAssetRef = react.useRef(void 0), isInitialMount = react.useRef(!0), currentAssetRef = value?.asset?._ref;
+  const { renderDefault, schemaType, value, mediaTags: mediaTagsProp } = props, toast = ui.useToast(), mediaTags = mediaTagsProp ?? schemaType?.options?.mediaTags, client = useVersionedClient(), { createTagsOnUpload } = useToolOptions(), prevAssetRef = react.useRef(void 0), isInitialMount = react.useRef(!0), currentAssetRef = value?.asset?._ref;
   return react.useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = !1, prevAssetRef.current = currentAssetRef;
@@ -5796,6 +5796,8 @@ function AutoTagInput(props) {
       createTagsOnUpload
     }).catch((err) => {
       console.error("[sanity-plugin-media] Failed to apply auto-tags:", err);
+      const label = mediaTags.length === 1 ? "tag" : "tags";
+      toast.push({ closable: !0, status: "error", title: `Failed to apply the media ${label} ${mediaTags.join(", ")}` });
     });
   }, [currentAssetRef, mediaTags, client, createTagsOnUpload]), renderDefault(props);
 }

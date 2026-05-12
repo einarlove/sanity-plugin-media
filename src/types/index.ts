@@ -5,6 +5,7 @@ import type {
   SanityDocument,
   SanityImageAssetDocument
 } from '@sanity/client'
+// eslint-disable-next-line no-restricted-imports
 import type {FileOptions, ImageOptions} from '@sanity/types'
 import type {ComponentType, JSX} from 'react'
 import type {Epic} from 'redux-observable'
